@@ -117,7 +117,6 @@ public class TeleportSpell implements Castable {
         return "";
     }
 
-
     private enum CircleDirection {
         INWARD(4, -1),
         OUTWARD(1, 1);

@@ -4,6 +4,7 @@ import com.jackob.spellCaster.SpellCaster;
 import com.jackob.spellCaster.enums.Combination;
 import com.jackob.spellCaster.enums.MouseClick;
 import com.jackob.spellCaster.spells.Castable;
+import com.jackob.spellCaster.spells.IceSpikesSpell;
 import com.jackob.spellCaster.spells.TeleportSpell;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -95,6 +96,7 @@ public class CastManager {
 
     private void initSpells() {
         spells.put(Combination.RRR, new TeleportSpell(plugin));
+        spells.put(Combination.RRL, new IceSpikesSpell(plugin));
     }
 
     private Combination constructCombination(List<MouseClick> mouseClicks) {
