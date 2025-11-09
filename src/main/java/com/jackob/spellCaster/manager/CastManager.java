@@ -1,7 +1,7 @@
 package com.jackob.spellCaster.manager;
 
-import com.jackob.spellCaster.MouseClick;
-import net.kyori.adventure.text.Component;
+import com.jackob.spellCaster.enums.MouseClick;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -29,6 +29,7 @@ public class CastManager {
             combination.add(mouseClick);
             playerCombinations.put(casterId, combination);
             clickTimestamps.put(casterId, System.currentTimeMillis());
+            sendCombinationInfo(caster, combination);
             return;
         }
 
@@ -36,13 +37,14 @@ public class CastManager {
             combination.clear();
             combination.add(mouseClick);
             clickTimestamps.put(casterId, System.currentTimeMillis());
+            sendCombinationInfo(caster, combination);
             return;
         }
 
         combination.add(mouseClick);
+        sendCombinationInfo(caster, combination);
 
         if (combination.size() == COMBINATION_LENGTH) {
-            constructCombination(caster, combination);
             combination.clear();
         }
 
@@ -56,14 +58,26 @@ public class CastManager {
         return timeDifference < MAX_TIME_DIFFERENCE;
     }
 
-    // just for testing purposes
-    private void constructCombination(Player caster, List<MouseClick> combination) {
+    private void sendCombinationInfo(Player caster, List<MouseClick> combination) {
         final StringBuilder sb = new StringBuilder();
 
-        for (MouseClick mouseClick : combination) {
-            sb.append(mouseClick.getLetterRepresentation());
+        for (int i = 0; i < combination.size(); i++) {
+            sb.append("<green>").append(combination.get(i).getLetterRepresentation()).append("</green>");
+
+            if (i != combination.size() - 1) {
+                sb.append("<gray> - <gray>");
+            }
         }
 
-        caster.sendActionBar(Component.text(sb.toString()));
+        while (sb.chars().filter(c -> c == '-').count() != 2) {
+            sb.append("<gray> - ?<gray>");
+        }
+
+        caster.sendActionBar(MiniMessage.miniMessage().deserialize(sb.toString()));
     }
+
+    private void castSpell() {
+
+    }
+
 }
