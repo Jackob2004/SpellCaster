@@ -8,7 +8,7 @@ public final class SpellCaster extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        CastManager castManager = new CastManager();
+        CastManager castManager = new CastManager(this);
 
         getServer().getPluginManager().registerEvents(new CastListener(castManager), this);
     }

@@ -1,8 +1,10 @@
 package com.jackob.spellCaster.manager;
 
+import com.jackob.spellCaster.SpellCaster;
 import com.jackob.spellCaster.enums.Combination;
 import com.jackob.spellCaster.enums.MouseClick;
 import com.jackob.spellCaster.spells.Castable;
+import com.jackob.spellCaster.spells.TeleportSpell;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -12,6 +14,8 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class CastManager {
+
+    private final SpellCaster plugin;
 
     private final static long MAX_TIME_DIFFERENCE = 500;
 
@@ -23,7 +27,8 @@ public class CastManager {
 
     private final Map<Combination, Castable> spells;
 
-    public CastManager() {
+    public CastManager(SpellCaster plugin) {
+        this.plugin = plugin;
         this.playerCombinations = new HashMap<>();
         this.clickTimestamps = new HashMap<>();
         this.spells = new HashMap<>();
@@ -89,7 +94,7 @@ public class CastManager {
     }
 
     private void initSpells() {
-
+        spells.put(Combination.RRR, new TeleportSpell(plugin));
     }
 
     private Combination constructCombination(List<MouseClick> mouseClicks) {

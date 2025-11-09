@@ -1,6 +1,6 @@
 package com.jackob.spellCaster.listener;
 
-import com.jackob.spellCaster.MouseClick;
+import com.jackob.spellCaster.enums.MouseClick;
 import com.jackob.spellCaster.manager.CastManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
