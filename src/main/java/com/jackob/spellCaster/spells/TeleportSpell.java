@@ -2,8 +2,11 @@ package com.jackob.spellCaster.spells;
 
 import com.jackob.spellCaster.SpellCaster;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class TeleportSpell implements Castable {
@@ -37,9 +40,49 @@ public class TeleportSpell implements Castable {
         return destination;
     }
 
+    private void playCircleEffect(Location location, CircleDirection circleDirection) {
+
+        new BukkitRunnable() {
+            int repetitions = 4;
+            int radius = circleDirection.startRadius;
+
+            @Override
+            public void run() {
+                if (repetitions <= 0) {
+                    this.cancel();
+                    return;
+                }
+
+                spawnCircle(location, radius);
+
+                repetitions--;
+                radius+= circleDirection.step;
+            }
+        }.runTaskTimer(plugin, 1, 2);
+
+    }
+
+    private void spawnCircle(Location location, int radius) {
+        final World world = location.getWorld();
+
+        for (int i = 0; i < 360; i++) {
+            double radians = Math.toRadians(i);
+            double x = Math.cos(radians) * radius;
+            double z = Math.sin(radians) * radius;
+
+            location.add(x, 0, z);
+            world.spawnParticle(Particle.WITCH, location, 1);
+            location.subtract(x, 0, z);
+        }
+
+    }
+
     @Override
     public void cast(Player caster) {
+        playCircleEffect(caster.getLocation(), CircleDirection.INWARD);
         final Location finalDestination = teleport(caster);
+        playCircleEffect(finalDestination, CircleDirection.OUTWARD);
+
         caster.playSound(caster.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
     }
 
@@ -51,6 +94,21 @@ public class TeleportSpell implements Castable {
     @Override
     public String getName() {
         return "";
+    }
+
+
+    private enum CircleDirection {
+        INWARD(4, -1),
+        OUTWARD(1, 1);
+
+        private final int startRadius;
+
+        private final int step;
+
+        CircleDirection(int startRadius, int step) {
+            this.startRadius = startRadius;
+            this.step = step;
+        }
     }
 
 }

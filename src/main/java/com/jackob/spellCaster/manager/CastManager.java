@@ -17,7 +17,7 @@ public class CastManager {
 
     private final SpellCaster plugin;
 
-    private final static long MAX_TIME_DIFFERENCE = 500;
+    private final static long MAX_TIME_DIFFERENCE = 700;
 
     private final static int COMBINATION_LENGTH = 3;
 
