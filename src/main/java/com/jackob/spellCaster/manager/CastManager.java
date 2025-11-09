@@ -1,7 +1,12 @@
 package com.jackob.spellCaster.manager;
 
+import com.jackob.spellCaster.enums.Combination;
 import com.jackob.spellCaster.enums.MouseClick;
+import com.jackob.spellCaster.spells.Castable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -16,9 +21,14 @@ public class CastManager {
 
     private final Map<UUID, Long> clickTimestamps;
 
+    private final Map<Combination, Castable> spells;
+
     public CastManager() {
         this.playerCombinations = new HashMap<>();
         this.clickTimestamps = new HashMap<>();
+        this.spells = new HashMap<>();
+
+        this.initSpells();
     }
 
     public void updateCombination(Player caster, MouseClick mouseClick) {
@@ -45,6 +55,7 @@ public class CastManager {
         sendCombinationInfo(caster, combination);
 
         if (combination.size() == COMBINATION_LENGTH) {
+            castSpell(caster, combination);
             combination.clear();
         }
 
@@ -58,13 +69,13 @@ public class CastManager {
         return timeDifference < MAX_TIME_DIFFERENCE;
     }
 
-    private void sendCombinationInfo(Player caster, List<MouseClick> combination) {
+    private void sendCombinationInfo(Player caster, List<MouseClick> mouseClicks) {
         final StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < combination.size(); i++) {
-            sb.append("<green>").append(combination.get(i).getLetterRepresentation()).append("</green>");
+        for (int i = 0; i < mouseClicks.size(); i++) {
+            sb.append("<green>").append(mouseClicks.get(i).getLetterRepresentation()).append("</green>");
 
-            if (i != combination.size() - 1) {
+            if (i != mouseClicks.size() - 1) {
                 sb.append("<gray> - <gray>");
             }
         }
@@ -74,10 +85,34 @@ public class CastManager {
         }
 
         caster.sendActionBar(MiniMessage.miniMessage().deserialize(sb.toString()));
+        caster.playSound(caster.getLocation(), Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
     }
 
-    private void castSpell() {
+    private void initSpells() {
 
+    }
+
+    private Combination constructCombination(List<MouseClick> mouseClicks) {
+        final StringBuilder sb = new StringBuilder();
+
+        for (MouseClick mouseClick : mouseClicks) {
+            sb.append(mouseClick.getLetterRepresentation());
+        }
+
+        return Combination.valueOf(sb.toString());
+    }
+
+    private void castSpell(Player caster, List<MouseClick> mouseClicks) {
+        final Combination combination = constructCombination(mouseClicks);
+        final Castable spell = spells.get(combination);
+
+        if (spell == null) {
+            caster.sendMessage(Component.text("No such spell exists!").color(NamedTextColor.RED));
+            caster.playSound(caster.getLocation(), Sound.ENTITY_WANDERING_TRADER_NO, 1, 1);
+            return;
+        }
+
+        spell.cast(caster);
     }
 
 }
