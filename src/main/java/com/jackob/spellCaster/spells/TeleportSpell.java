@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -77,10 +78,30 @@ public class TeleportSpell implements Castable {
 
     }
 
+    private void playLineEffect(Location start, Location end, Player damageSource) {
+        final World world = start.getWorld();
+        final Vector direction = start.getDirection();
+
+        while (!start.equals(end)) {
+            start.add(direction);
+
+            world.spawnParticle(Particle.DRIPPING_LAVA, start, 5, 0.5, 0.2, 0.5);
+            start.getNearbyEntities(1,1,1).stream()
+                    .filter(e -> e instanceof Damageable)
+                    .forEach(e -> ((Damageable) e).damage(2, damageSource));
+        }
+
+    }
+
     @Override
     public void cast(Player caster) {
-        playCircleEffect(caster.getLocation(), CircleDirection.INWARD);
+        final Location startLocation = caster.getLocation();
+
+        playCircleEffect(startLocation.clone(), CircleDirection.INWARD);
+
         final Location finalDestination = teleport(caster);
+
+        playLineEffect(startLocation, finalDestination, caster);
         playCircleEffect(finalDestination, CircleDirection.OUTWARD);
 
         caster.playSound(caster.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
