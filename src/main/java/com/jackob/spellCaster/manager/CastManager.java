@@ -101,27 +101,32 @@ public class CastManager {
         spells.put(Combination.LLL, new BoulderSpell(plugin));
     }
 
-    private Combination constructCombination(List<MouseClick> mouseClicks) {
+    private Optional<Combination> constructCombination(List<MouseClick> mouseClicks) {
         final StringBuilder sb = new StringBuilder();
 
         for (MouseClick mouseClick : mouseClicks) {
             sb.append(mouseClick.getLetterRepresentation());
         }
 
-        return Combination.valueOf(sb.toString());
+        try {
+            return Optional.of(Combination.valueOf(sb.toString()));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     private void castSpell(Player caster, List<MouseClick> mouseClicks) {
-        final Combination combination = constructCombination(mouseClicks);
-        final Castable spell = spells.get(combination);
+        constructCombination(mouseClicks)
+                .map(spells::get)
+                .ifPresentOrElse(
+                        spell -> spell.cast(caster),
+                        () -> onSpellNotFound(caster)
+                );
+    }
 
-        if (spell == null) {
-            caster.sendMessage(Component.text("No such spell exists!").color(NamedTextColor.RED));
-            caster.playSound(caster.getLocation(), Sound.ENTITY_WANDERING_TRADER_NO, 1, 1);
-            return;
-        }
-
-        spell.cast(caster);
+    private void onSpellNotFound(Player caster) {
+        caster.sendMessage(Component.text("No such spell exists!").color(NamedTextColor.RED));
+        caster.playSound(caster.getLocation(), Sound.ENTITY_WANDERING_TRADER_NO, 1, 1);
     }
 
 }
