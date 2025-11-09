@@ -2,10 +2,7 @@ package com.jackob.spellCaster.spells;
 
 import com.jackob.spellCaster.SpellCaster;
 import org.bukkit.*;
-import org.bukkit.entity.BlockDisplay;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.joml.Matrix4f;
@@ -42,6 +39,7 @@ public class IceSpikesSpell implements Castable {
 
                 location.add(direction).add(offset, 0, offset);
                 entities.offer(spawnSpike(location, world));
+                freezeEffect(location, player);
                 world.spawnParticle(Particle.SNOWFLAKE, location, 3, offset, offset, offset);
                 location.subtract(offset, 0, offset);
 
@@ -64,6 +62,16 @@ public class IceSpikesSpell implements Castable {
                 entities.poll().remove();
             }
         }.runTaskTimer(plugin, 1, 3);
+    }
+
+    private void freezeEffect(Location location, Player damager) {
+        location.getNearbyEntities(1.5,1.5,1.5).forEach(entity -> {
+            entity.setFreezeTicks(5 * 20);
+
+            if (entity instanceof Damageable) {
+                ((Damageable) entity).damage(2, damager);
+            }
+        });
     }
 
     private BlockDisplay spawnSpike(Location location, World world) {
