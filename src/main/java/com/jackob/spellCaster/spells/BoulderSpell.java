@@ -1,13 +1,9 @@
 package com.jackob.spellCaster.spells;
 
 import com.jackob.spellCaster.SpellCaster;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.BlockDisplay;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import com.jackob.spellCaster.util.SpellsUtil;
+import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.joml.Matrix4f;
@@ -30,17 +26,24 @@ public class BoulderSpell implements Castable {
         return rand.nextFloat(min, max);
     }
 
-    private void playBoulderEffect(Location location) {
+    private void playBoulderEffect(Location location, Player player) {
         List<Display> fragments = spawnBoulder(location);
+        final World world = location.getWorld();
 
         new BukkitRunnable() {
-            final float fallingFactor = 0.1f;
+            final float fallingFactor = 0.15f;
+            boolean canceled = false;
+
             @Override
             public void run() {
-                if (!location.getBlock().isEmpty()) {
-                    this.cancel();
-                    fragments.forEach(Entity::remove);
-                    return;
+                if (!location.getBlock().isEmpty() && !canceled) {
+                    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        this.cancel();
+                        fragments.forEach(Entity::remove);
+                    }, 20 * 4);
+
+                    playGroundHitEffect(location.clone(), player);
+                    canceled = true;
                 }
 
                 fragments.forEach(display -> {
@@ -49,13 +52,26 @@ public class BoulderSpell implements Castable {
                     display.teleport(loc);
                 });
 
+                world.spawnParticle(Particle.ASH, location.clone().add(0, 2, 0), 8,1,1,1);
                 location.setY(location.getY() - fallingFactor);
             }
         }.runTaskTimer(plugin, 1, 1);
     }
 
-    private void playGroundHitEffect(List<Display> fragments) {
+    private void playGroundHitEffect(Location location, Player damager) {
+        SpellsUtil.playCircleEffect(plugin, location, SpellsUtil.CircleDirection.OUTWARD, 15, Particle.WAX_OFF);
 
+        for (Entity e : location.getNearbyEntities(15, 15, 15)) {
+            if (e.equals(damager)) continue;
+
+            e.setVelocity(new Vector(0, 1.5, 0));
+
+            if (e instanceof Damageable d) {
+                d.damage(3, damager);
+            }
+        }
+
+        damager.playSound(damager.getLocation(), Sound.BLOCK_ANVIL_LAND, 1, 1);
     }
 
     private List<Display> spawnBoulder(Location location) {
@@ -91,10 +107,11 @@ public class BoulderSpell implements Castable {
 
     @Override
     public void cast(Player caster) {
-        Vector direction = caster.getEyeLocation().getDirection().normalize().multiply(12);
-        Location location = caster.getLocation().add(direction);
+        Vector direction = caster.getLocation().getDirection().normalize().multiply(12);
+        Location location = caster.getLocation().add(direction).add(0,10,0);
 
-        playBoulderEffect(location);
+        playBoulderEffect(location, caster);
+        caster.playSound(caster.getLocation(), Sound.BLOCK_STONE_BREAK, 1, 1);
     }
 
     @Override

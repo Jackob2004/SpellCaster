@@ -65,13 +65,15 @@ public class IceSpikesSpell implements Castable {
     }
 
     private void freezeEffect(Location location, Player damager) {
-        location.getNearbyEntities(1.5,1.5,1.5).forEach(entity -> {
+        for (Entity entity : location.getNearbyEntities(1.5, 1.5, 1.5)) {
+            if (entity.equals(damager)) continue;
+
             entity.setFreezeTicks(5 * 20);
 
             if (entity instanceof Damageable) {
                 ((Damageable) entity).damage(2, damager);
             }
-        });
+        }
     }
 
     private BlockDisplay spawnSpike(Location location, World world) {
