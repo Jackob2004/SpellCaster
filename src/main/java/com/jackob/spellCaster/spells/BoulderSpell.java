@@ -10,7 +10,6 @@ import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class BoulderSpell implements Castable {
 
@@ -20,14 +19,8 @@ public class BoulderSpell implements Castable {
         this.plugin = plugin;
     }
 
-    private float randomNum(float min, float max) {
-        final Random rand = new Random();
-
-        return rand.nextFloat(min, max);
-    }
-
     private void playBoulderEffect(Location location, Player player) {
-        List<Display> fragments = spawnBoulder(location);
+        final List<Display> fragments = spawnBoulder(location);
         final World world = location.getWorld();
 
         new BukkitRunnable() {
@@ -75,6 +68,8 @@ public class BoulderSpell implements Castable {
     }
 
     private List<Display> spawnBoulder(Location location) {
+        final World world = location.getWorld();
+
         final int size = 5;
         final int halfSize = size / 2;
         final List<Display> fragments = new ArrayList<>(size * size * size);
@@ -83,7 +78,7 @@ public class BoulderSpell implements Castable {
             for (int y = -halfSize; y < halfSize; y++) {
                 for (int z = -halfSize; z < halfSize; z++) {
                     location.add(x, y, z);
-                    fragments.add(spawnBoulderFragment(location));
+                    fragments.add(spawnBoulderFragment(location, world));
                     location.subtract(x, y, z);
                 }
             }
@@ -92,11 +87,14 @@ public class BoulderSpell implements Castable {
         return fragments;
     }
 
-    private BlockDisplay spawnBoulderFragment(Location location) {
-        final World world = location.getWorld();
+    private BlockDisplay spawnBoulderFragment(Location location, World world) {
         final Matrix4f matrix = new Matrix4f()
-                .scale(randomNum(-0.25f, 2))
-                .rotateXYZ((float) Math.toRadians(360 - randomNum(10, 45)), 0, (float) Math.toRadians(randomNum(10, 45)));
+                .scale(SpellsUtil.randomFloat(-0.25f, 2))
+                .rotateXYZ(
+                        (float) Math.toRadians(360 - SpellsUtil.randomFloat(10, 45)), // rotate -
+                        0,
+                        (float) Math.toRadians(SpellsUtil.randomFloat(10, 45)) // rotate +
+                );
 
         return world.spawn(location, BlockDisplay.class, e -> {
             e.setBlock(Material.STONE.createBlockData());
@@ -107,8 +105,8 @@ public class BoulderSpell implements Castable {
 
     @Override
     public void cast(Player caster) {
-        Vector direction = caster.getLocation().getDirection().normalize().multiply(12);
-        Location location = caster.getLocation().add(direction).add(0,10,0);
+        final Vector direction = caster.getLocation().getDirection().normalize().multiply(12);
+        final Location location = caster.getLocation().add(direction).add(0,10,0);
 
         playBoulderEffect(location, caster);
         caster.playSound(caster.getLocation(), Sound.BLOCK_STONE_BREAK, 1, 1);
