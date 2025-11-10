@@ -10,6 +10,8 @@ import java.util.Random;
 
 public class SpellsUtil {
 
+    private static final Random random = new Random();
+
     public static void playCircleEffect(SpellCaster plugin, Location location, CircleDirection circleDirection, final int repetitions, Particle particle) {
 
         new BukkitRunnable() {
@@ -62,13 +64,15 @@ public class SpellsUtil {
     }
 
     public static float randomFloat(float min, float max) {
-        final Random rand = new Random();
-
-        return rand.nextFloat(min, max);
+        return random.nextFloat(min, max);
     }
 
     public static float randomFloat() {
         return randomFloat(-1, 1);
+    }
+
+    public static int randomInt(int min, int max) {
+        return random.nextInt(min, max);
     }
 
 }

@@ -36,6 +36,7 @@ public class BoulderSpell implements Castable {
                     }, 20 * 4);
 
                     playGroundHitEffect(location.clone(), player);
+                    playExplosionEffect(location.clone());
                     canceled = true;
                 }
 
@@ -100,6 +101,34 @@ public class BoulderSpell implements Castable {
             e.setBlock(Material.STONE.createBlockData());
             e.setTransformationMatrix(matrix);
             e.setTeleportDuration(1);
+        });
+    }
+
+    private void playExplosionEffect(Location location) {
+        final World world = location.getWorld();
+
+        final int elements = SpellsUtil.randomInt(5, 20);
+        final List<Entity> explosionFragments = new ArrayList<>(elements);
+
+        for (int i = 0; i < elements; i++) {
+            Entity boulderFragment = spawnBoulderFragment(location, world);
+            Entity stand = spawnExplosionFragment(location, world, boulderFragment);
+
+            explosionFragments.add(stand);
+            explosionFragments.add(boulderFragment);
+
+            stand.setVelocity(new Vector(SpellsUtil.randomFloat(-3,3), SpellsUtil.randomFloat(1.1f,4), SpellsUtil.randomFloat(-3,3)));
+        }
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> explosionFragments.forEach(Entity::remove), 4 * 20);
+    }
+
+    private ArmorStand spawnExplosionFragment(Location location, World world, Entity visualPart) {
+        return world.spawn(location, ArmorStand.class, e -> {
+            e.setInvulnerable(true);
+            e.setInvisible(true);
+            e.setSmall(SpellsUtil.randomFloat() > 0);
+            e.addPassenger(visualPart);
         });
     }
 
