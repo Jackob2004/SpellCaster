@@ -98,11 +98,11 @@ public class IceShardsSpell implements Castable {
 
     @Override
     public int getManaCost() {
-        return 0;
+        return 350;
     }
 
     @Override
     public String getName() {
-        return "";
+        return "Ice Shards";
     }
 }

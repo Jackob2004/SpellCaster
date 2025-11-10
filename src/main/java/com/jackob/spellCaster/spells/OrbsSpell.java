@@ -40,12 +40,12 @@ public class OrbsSpell implements Castable {
 
     @Override
     public int getManaCost() {
-        return 0;
+        return 300;
     }
 
     @Override
     public String getName() {
-        return "";
+        return "Heal Orbs";
     }
 
     private static class Orb implements Listener {

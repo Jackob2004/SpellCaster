@@ -12,9 +12,14 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 public class CastManager {
 
     private final SpellCaster plugin;
+
+    private final ManaManager manaManager;
 
     private final static long MAX_TIME_DIFFERENCE = 700;
 
@@ -26,8 +31,9 @@ public class CastManager {
 
     private final Map<Combination, Castable> spells;
 
-    public CastManager(SpellCaster plugin) {
+    public CastManager(SpellCaster plugin, ManaManager manaManager) {
         this.plugin = plugin;
+        this.manaManager = manaManager;
         this.playerCombinations = new HashMap<>();
         this.clickTimestamps = new HashMap<>();
         this.spells = new HashMap<>();
@@ -64,6 +70,11 @@ public class CastManager {
         }
 
         clickTimestamps.put(casterId, System.currentTimeMillis());
+    }
+
+    public void unregisterCaster(UUID playerUUID) {
+        playerCombinations.remove(playerUUID);
+        clickTimestamps.remove(playerUUID);
     }
 
     private boolean clickedOnTime(UUID casterId) {
@@ -117,13 +128,29 @@ public class CastManager {
         constructCombination(mouseClicks)
                 .map(spells::get)
                 .ifPresentOrElse(
-                        spell -> spell.cast(caster),
+                        castable -> executeSpell(caster, castable),
                         () -> onSpellNotFound(caster)
                 );
     }
 
+    private void executeSpell(Player caster, Castable castable) {
+        if (manaManager.useManaBank(caster.getUniqueId(), castable.getManaCost())) {
+            castable.cast(caster);
+
+            final Component component = text()
+                    .content(castable.getName() + " spell cast!").color(GRAY)
+                    .append(text(" [-" + castable.getManaCost() + "]", BLUE))
+                    .build();
+
+            caster.sendMessage(component);
+        } else {
+            caster.sendMessage(text("You don't have enough mana").color(NamedTextColor.DARK_RED));
+            caster.playSound(caster.getLocation(), Sound.ITEM_BUNDLE_INSERT_FAIL, 1, 1);
+        }
+    }
+
     private void onSpellNotFound(Player caster) {
-        caster.sendMessage(Component.text("No such spell exists!").color(NamedTextColor.RED));
+        caster.sendMessage(text("No such spell exists!").color(NamedTextColor.RED));
         caster.playSound(caster.getLocation(), Sound.ENTITY_WANDERING_TRADER_NO, 1, 1);
     }
 

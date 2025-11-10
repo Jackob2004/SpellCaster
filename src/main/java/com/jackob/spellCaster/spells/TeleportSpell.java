@@ -80,12 +80,12 @@ public class TeleportSpell implements Castable {
 
     @Override
     public int getManaCost() {
-        return 0;
+        return 200;
     }
 
     @Override
     public String getName() {
-        return "";
+        return "Teleport";
     }
 
 

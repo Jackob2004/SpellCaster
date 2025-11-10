@@ -143,11 +143,11 @@ public class BoulderSpell implements Castable {
 
     @Override
     public int getManaCost() {
-        return 0;
+        return 600;
     }
 
     @Override
     public String getName() {
-        return "";
+        return "Boulder";
     }
 }
