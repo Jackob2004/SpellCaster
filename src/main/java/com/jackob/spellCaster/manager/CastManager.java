@@ -3,10 +3,7 @@ package com.jackob.spellCaster.manager;
 import com.jackob.spellCaster.SpellCaster;
 import com.jackob.spellCaster.enums.Combination;
 import com.jackob.spellCaster.enums.MouseClick;
-import com.jackob.spellCaster.spells.BoulderSpell;
-import com.jackob.spellCaster.spells.Castable;
-import com.jackob.spellCaster.spells.IceShardsSpell;
-import com.jackob.spellCaster.spells.TeleportSpell;
+import com.jackob.spellCaster.spells.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -99,6 +96,7 @@ public class CastManager {
         spells.put(Combination.RRR, new TeleportSpell(plugin));
         spells.put(Combination.RRL, new IceShardsSpell(plugin));
         spells.put(Combination.LLL, new BoulderSpell(plugin));
+        spells.put(Combination.RLR, new OrbsSpell(plugin));
     }
 
     private Optional<Combination> constructCombination(List<MouseClick> mouseClicks) {
