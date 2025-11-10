@@ -6,6 +6,8 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Random;
+
 public class SpellsUtil {
 
     public static void playCircleEffect(SpellCaster plugin, Location location, CircleDirection circleDirection, final int repetitions, Particle particle) {
@@ -57,6 +59,16 @@ public class SpellsUtil {
             this.startRadius = startRadius;
             this.step = step;
         }
+    }
+
+    public static float randomFloat(float min, float max) {
+        final Random rand = new Random();
+
+        return rand.nextFloat(min, max);
+    }
+
+    public static float randomFloat() {
+        return randomFloat(-1, 1);
     }
 
 }

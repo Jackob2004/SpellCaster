@@ -1,6 +1,7 @@
 package com.jackob.spellCaster.spells;
 
 import com.jackob.spellCaster.SpellCaster;
+import com.jackob.spellCaster.util.SpellsUtil;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -9,11 +10,11 @@ import org.joml.Matrix4f;
 
 import java.util.*;
 
-public class IceSpikesSpell implements Castable {
+public class IceShardsSpell implements Castable {
 
     private final SpellCaster plugin;
 
-    public IceSpikesSpell(SpellCaster plugin) {
+    public IceShardsSpell(SpellCaster plugin) {
         this.plugin = plugin;
     }
 
@@ -35,7 +36,7 @@ public class IceSpikesSpell implements Castable {
                     return;
                 }
 
-                float offset = randomNum();
+                float offset = SpellsUtil.randomFloat();
 
                 location.add(direction).add(offset, 0, offset);
                 entities.offer(spawnSpike(location, world));
@@ -77,19 +78,17 @@ public class IceSpikesSpell implements Castable {
     }
 
     private BlockDisplay spawnSpike(Location location, World world) {
-        final Matrix4f matrix = new Matrix4f(1f,0f,0f,0f,randomNum(),1f,0f,0f,randomNum(),randomNum(),1f,0f,0f,0f,0f,1f);
+        final Matrix4f matrix = new Matrix4f(
+                1f, 0f, 0f, 0f,
+                SpellsUtil.randomFloat(), 1f, 0f, 0f,
+                SpellsUtil.randomFloat(), SpellsUtil.randomFloat(), 1f, 0f,
+                0f, 0f, 0f, 1f);
 
         return world.spawn(location, BlockDisplay.class, e -> {
             e.setBlock(Material.BLUE_ICE.createBlockData());
             e.setTransformationMatrix(matrix);
             e.setBrightness(new Display.Brightness(15, 15));
         });
-    }
-
-    private float randomNum() {
-        final Random rand = new Random();
-
-        return rand.nextFloat(-1, 1);
     }
 
     @Override
